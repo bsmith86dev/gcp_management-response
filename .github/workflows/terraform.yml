@@ -1,0 +1,48 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.11
+
+      - name: Configure GCP Credentials
+        run: |
+          echo "${{ secrets.GCP_CREDENTIALS }}" > $HOME/gcloud.json
+          gcloud auth activate-service-account --key-file=$HOME/gcloud.json
+          gcloud config set project ${{ secrets.PROJECT_ID }}
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Validate Terraform
+        run: terraform validate
+
+      - name: Plan Terraform
+        id: plan
+        run: terraform plan -out=plan.tfplan
+        continue-on-error: true
+
+      - name: Save Plan Output
+        if: failure()
+        run: echo "### Terraform Plan Failed" > $GITHUB_STEP_SUMMARY
+
+      - name: Apply Terraform
+        if: success()
+        run: terraform apply -auto-approve plan.tfplan
