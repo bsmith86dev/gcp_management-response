@@ -82,6 +82,8 @@ resource "google_monitoring_uptime_check_config" "uptime_check" {
 # Cloud Monitoring Alert Policy
 resource "google_monitoring_alert_policy" "alert_policy" {
   display_name = "High CPU Alert"
+  combiner     = "AND"
+
   conditions {
     display_name = "High CPU Condition"
     condition_threshold {
@@ -96,6 +98,7 @@ resource "google_monitoring_alert_policy" "alert_policy" {
       }
     }
   }
+
   notification_channels = [google_monitoring_notification_channel.email_channel.name]
 }
 
