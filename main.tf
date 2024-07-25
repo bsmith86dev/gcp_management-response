@@ -25,8 +25,8 @@ resource "google_project_service" "enabled_apis" {
 # IAM roles for Security Command Center
 resource "google_project_iam_member" "scc_roles" {
   for_each = {
-    "roles/securitycenter.admin"        = "var.admin"
-    "roles/securitycenter.findingsEditor" = "var.user"
+    "roles/securitycenter.admin"        = "user:${var.admin}"
+    "roles/securitycenter.findingsEditor" = "user:${var.user}"
   }
   project = var.project_id
   role    = each.key
@@ -109,7 +109,6 @@ resource "google_cloudfunctions_function" "high_cpu_alert_function" {
   entry_point = "high_cpu_alert"
   source_archive_bucket = google_storage_bucket.function_bucket.name
   source_archive_object = google_storage_bucket_object.function_zip.name
-  trigger_http = false
   available_memory_mb = 256
 
   event_trigger {
@@ -132,5 +131,5 @@ resource "google_storage_bucket" "function_bucket" {
 resource "google_storage_bucket_object" "function_zip" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.function_bucket.name
-  source = "path/to/function/source.zip"  # Update this with your source code path
+  source = "gs://managemesnt-response-function-source/function-source.zip"  # Update this with your source code path
 }
