@@ -17,6 +17,8 @@ resource "google_project_service" "enabled_apis" {
     "iam.googleapis.com",
     "compute.googleapis.com",
     "bigquery.googleapis.com",
+    "pubsub.googleapis.com",
+    "cloudresourcemanager.googleapis.com"
   ])
   project = var.project_id
   service = each.key
@@ -56,7 +58,7 @@ resource "google_monitoring_notification_channel" "email_channel" {
   display_name = "Email Notification Channel"
   type         = "email"
   labels = {
-    email_address = "var.admin"
+    email_address = var.admin
   }
 }
 
@@ -131,5 +133,5 @@ resource "google_storage_bucket" "function_bucket" {
 resource "google_storage_bucket_object" "function_zip" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.function_bucket.name
-  source = "gs://managemesnt-response-function-source/function-source.zip"  # Update this with your source code path
+  source = "gs://managemesnt-response-function-source/"  # Update this with your source code path
 }
